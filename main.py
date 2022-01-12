@@ -65,8 +65,8 @@ def update_state_history():
 
 def report():
     report_text = []
-    for key in state_history:
-        report_text.append(f"{key.strftime('%a %H:%M')} {state_history[key]}\n")
+    for timestamp in sorted(state_history, reverse=True):
+        report_text.append(f"{timestamp.strftime('%a %H:%M')} {state_history[timestamp]}\n")
     try:
         with open(output_file, "w") as f:
             f.writelines(report_text)
