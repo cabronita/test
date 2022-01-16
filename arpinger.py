@@ -50,9 +50,9 @@ def is_online():
 
 
 def report():
-    background = 'palegreen' if not state_history or state_history[-1].online == True else 'pink'
+    background = 'palegreen' if state_history[-1].online == True else 'pink'
     html = []
-    html.append(f"<html><meta http-equiv='refresh' content='30' ><body style='background-color:{background};''><h1>\n")
+    html.append(f"<html><meta http-equiv='refresh' content='10' ><body style='background-color:{background};''><h1>\n")
     limit = -21 if full_output else 0
     for i in state_history[-1:limit:-1]:
         html.append(str(i) + '<br>\n')
@@ -100,7 +100,8 @@ if __name__ == '__main__':
     state = State()
     state_history_file = f"{target}.dat"
     state_history = load_state_history()
-    report()
+    if state_history:
+        report()
 
     while True:
         timestamp = get_timestamp()
@@ -111,4 +112,6 @@ if __name__ == '__main__':
         else:
             if not state.online:
                 state = State()
+                if state.online and update_history(state):
+                    report()
         sleep(1)
