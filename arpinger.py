@@ -10,18 +10,20 @@ import os
 import pickle
 import subprocess
 
-logging.basicConfig(filename='arpinger.log', filemode='w', encoding='utf-8', level=logging.DEBUG,
-                    format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-
 parser = ArgumentParser()
 parser.add_argument('target', help='target IP address', metavar='IP', type=str)
+parser.add_argument('-l', '--logfile', default='arpinger.log', help='log filename', metavar='FILE')
 parser.add_argument('-o', '--output', default='report.html', help='report file', metavar='FILE')
 parser.add_argument('-f', '--full-output', action='store_false', help='show full report, rather than last 20 events')
 args = parser.parse_args()
 
 target = args.target
+logfile = args.logfile
 report_file = args.output
 full_output = args.full_output
+
+logging.basicConfig(filename=logfile, filemode='w', encoding='utf-8', level=logging.DEBUG,
+                    format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
 
 class State:
@@ -53,15 +55,14 @@ def report():
     html.append(f"<html><meta http-equiv='refresh' content='60' ><body style='background-color:{background};''><h1>")
     limit = -21 if full_output else 0
     for i in state_history[-1:limit:-1]:
-        html.append(str(i) + '<br>')
-    html.append('</h1></body></html>')
+        html.append(str(i) + '\n<br>')
+    html.append('\n</h1></body></html>')
     try:
         logging.debug(f"Writing report")
         with open(report_file, 'w') as f:
             f.writelines(html)
     except Exception as err:
         logging.debug(f"Failed to write report - {err}")
-        logging.debug(err)
 
 
 def load_state_history():
@@ -92,7 +93,6 @@ def update_history(state):
             state_history.append(state)
             save_state_history()
             return True
-    return False
 
 
 if __name__ == '__main__':
