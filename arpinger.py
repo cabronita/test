@@ -56,7 +56,7 @@ def report():
     limit = -21 if full_output else 0
     for i in state_history[-1:limit:-1]:
         html.append(str(i) + '<br>\n')
-    html.append('\n</h1></body></html>')
+    html.append('</h1></body></html>')
     try:
         logging.debug(f"Writing report")
         with open(report_file, 'w') as f:
