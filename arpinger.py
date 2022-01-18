@@ -86,7 +86,7 @@ def update_history(state):
     if not state_history:
         state_history.append(state)
         logging.debug(f"Fresh history started")
-        logging.debug(f"Online state {state} added to history")
+        logging.debug(f"Online state {state.online} added to history")
         save_state_history()
         return True
     else:
