@@ -58,7 +58,7 @@ def report():
         html.append(str(i) + '<br>\n')
     html.append('</h1></body></html>')
     try:
-        logging.debug(f"Writing report")
+        logging.debug(f"Writing report {report_file}")
         with open(report_file, 'w') as f:
             f.writelines(html)
     except Exception as err:
@@ -85,12 +85,15 @@ def save_state_history():
 def update_history(state):
     if not state_history:
         state_history.append(state)
+        logging.debug(f"Fresh history started")
+        logging.debug(f"Online state {state} added to history")
         save_state_history()
         return True
     else:
         previous_state = state_history[-1]
         if state.online != previous_state.online:
             state_history.append(state)
+            logging.debug(f"Online state {state} added to history")
             save_state_history()
             return True
 
