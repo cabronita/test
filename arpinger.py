@@ -52,11 +52,11 @@ def is_online():
 def report():
     background = 'palegreen' if state_history[-1].online == True else 'pink'
     html = []
-    html.append(
-        f"<html><meta http-equiv='refresh' content='30' ><body style='background-color:{background};''><pre style='font-size:800%;font-weight: bold'>\n")
+    html.append(f"<html><meta http-equiv='refresh' content='15' ><body style='background-color:{background};'>")
+    html.append("<pre style='font-size:800%;font-weight:bold;line-height:50%'>\n")
     limit = -21 if full_output else 0
     for i in state_history[-1:limit:-1]:
-        html.append(str(i) + '<br>\n')
+        html.append('\n<br>' + str(i))
     html.append('</pre></body></html>')
     try:
         logging.debug(f"Writing report {report_file}")
