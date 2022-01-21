@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from argparse import ArgumentParser
-from datetime import datetime
+from datetime import datetime, timedelta
 from platform import system
 from random import randrange
 from time import sleep
@@ -41,7 +41,7 @@ def get_timestamp():
 
 def is_online():
     if system() == 'Windows':
-        return True if randrange(50) == 0 else False
+        return True if randrange(60) == 0 else False
     else:
         interface = subprocess.run(['/usr/sbin/ip', '-oneline', 'route', 'get', target],
                                    capture_output=True, text=True).stdout.split()[2]
@@ -59,7 +59,7 @@ def report():
         html.append('\n<br>' + str(i))
     html.append('</pre></body></html>')
     try:
-        logging.debug(f"Writing report {report_file}")
+        logging.debug(f"Writing {report_file}")
         with open(report_file, 'w') as f:
             f.writelines(html)
     except Exception as err:
@@ -83,18 +83,33 @@ def save_state_history():
         pickle.dump(state_history, f)
 
 
+def is_flapping(previous_state, lookback=1):
+    return previous_state.time == state.time - timedelta(minutes=lookback)
+
+
 def update_history(state):
     if not state_history:
         state_history.append(state)
         logging.debug(f"Fresh history started")
-        logging.debug(f"Online state {state.online} added to history")
+        logging.debug(f"State {state} added to history")
         save_state_history()
         return True
     else:
         previous_state = state_history[-1]
         if state.online != previous_state.online:
+            if state.online:
+                if is_flapping(previous_state):
+                    logging.debug(
+                        f"Quick DOWN>UP state change detected. Previous: {previous_state}. Current: {state}.")
+                    logging.debug("Removing previous state from history. Discarding current state.")
+                    state_history.pop()
+                    if not state_history:
+                        logging.debug(f"state_history now empty. Adding current state: {state}")
+                        state_history.append(state)
+                    save_state_history()
+                    return True
             state_history.append(state)
-            logging.debug(f"Online state {state} added to history")
+            logging.debug(f"State {state} added to history")
             save_state_history()
             return True
 
@@ -105,6 +120,9 @@ if __name__ == '__main__':
     state_history_file = f"{target}.dat"
     state_history = load_state_history()
     if state_history:
+        report()
+    else:
+        update_history(state)
         report()
 
     while True:
